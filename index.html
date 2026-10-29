@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+
+<meta name="theme-color" content="#123B5D">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="O2 Lookup">
+<meta name="mobile-web-app-capable" content="yes">
+
+
+
+<title>O2 Lookup Tool</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background:#f3f6f9;
+        margin:0;
+        padding:20px;
+        color:#1f2937;
+    }
+    .card {
+        max-width:680px;
+        margin:0 auto;
+        background:white;
+        border-radius:14px;
+        box-shadow:0 4px 18px rgba(0,0,0,.12);
+        overflow:hidden;
+    }
+    .header {
+        background:#1f4e78;
+        color:white;
+        padding:20px;
+        text-align:center;
+        font-size:24px;
+        font-weight:700;
+    }
+    .section { padding:20px; }
+    .grid {
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        gap:14px;
+    }
+    label {
+        display:block;
+        font-weight:700;
+        margin-bottom:6px;
+    }
+    input {
+        width:100%;
+        box-sizing:border-box;
+        padding:12px;
+        font-size:18px;
+        border:1px solid #cbd5e1;
+        border-radius:8px;
+        background:#fffbea;
+    }
+    .summary {
+        margin-top:18px;
+        padding:14px;
+        background:#eaf2f8;
+        border-radius:8px;
+        line-height:1.6;
+    }
+    table {
+        width:100%;
+        border-collapse:collapse;
+        margin-top:18px;
+    }
+    th, td {
+        padding:12px;
+        border-bottom:1px solid #e5e7eb;
+        text-align:left;
+    }
+    th {
+        background:#4472c4;
+        color:white;
+    }
+    td.value {
+        background:#e2f0d9;
+        font-weight:700;
+        font-size:20px;
+    }
+    .error {
+        margin-top:16px;
+        padding:12px;
+        border-radius:8px;
+        background:#fee2e2;
+        color:#991b1b;
+        display:none;
+    }
+    .note {
+        font-size:12px;
+        color:#6b7280;
+        margin-top:16px;
+    }
+    @media (max-width:600px) {
+        .grid { grid-template-columns:1fr; }
+        body { padding:10px; }
+    }
+
+    html, body { min-height:100%; }
+    body {
+        padding:
+          max(12px, env(safe-area-inset-top))
+          max(12px, env(safe-area-inset-right))
+          max(16px, env(safe-area-inset-bottom))
+          max(12px, env(safe-area-inset-left));
+        -webkit-tap-highlight-color: transparent;
+        overscroll-behavior: none;
+    }
+    .card {
+        max-width:760px;
+        min-height:calc(100vh - 32px);
+    }
+    .header {
+        padding:24px 18px;
+        font-size:28px;
+        letter-spacing:.2px;
+    }
+    input {
+        min-height:56px;
+        font-size:22px;
+        border-radius:12px;
+        -webkit-appearance:none;
+        appearance:none;
+    }
+    .summary {
+        font-size:19px;
+        padding:16px;
+    }
+    th, td {
+        padding:15px 12px;
+        font-size:18px;
+    }
+    td.value {
+        font-size:24px;
+    }
+    .app-subtitle {
+        font-size:13px;
+        font-weight:400;
+        opacity:.88;
+        margin-top:4px;
+    }
+    .install-tip {
+        margin-top:18px;
+        padding:12px 14px;
+        background:#f8fafc;
+        border:1px solid #e2e8f0;
+        border-radius:10px;
+        font-size:13px;
+        color:#475569;
+        line-height:1.45;
+    }
+    @media (display-mode: standalone) {
+        .install-tip { display:none; }
+        .card { min-height:calc(100vh - 24px); }
+    }
+    @media (max-width:600px) {
+        .header { font-size:24px; }
+        .section { padding:16px; }
+        th, td { font-size:16px; }
+        td.value { font-size:22px; }
+    }
+
+</style>
+</head>
+<body>
+<div class="card">
+    <div class="header">O2 Lookup<div class="app-subtitle">Slightlyovertorqued</div></div>
+    <div class="section">
+        <div class="grid">
+            <div>
+                <label for="nose">Nose Number</label>
+                <input id="nose" type="number" value="4001" inputmode="numeric">
+            </div>
+            <div>
+                <label for="oat">OAT °C</label>
+                <input id="oat" type="number" step="0.1" value="15">
+            </div>
+            <div>
+                <label for="cockpit">Cockpit Temp °F</label>
+                <input id="cockpit" type="number" step="0.1" value="59">
+            </div>
+        </div>
+
+        <div class="summary">
+            <div><strong>Reference Temp:</strong> <span id="refTemp">—</span> °C</div>
+            <div><strong>Table Used:</strong> <span id="tableUsed">—</span></div>
+        </div>
+
+        <div id="error" class="error"></div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Crew Configuration</th>
+                    <th>Interpolated O2 Value</th>
+                </tr>
+            </thead>
+            <tbody id="results"></tbody>
+        </table>
+
+
+        <div class="install-tip">
+            <strong>iPad/iPhone:</strong> Open this page in Safari, tap the Share button, then choose <strong>Add to Home Screen</strong> for an app-style shortcut.
+        </div>
+
+        <div class="note">
+            Values between listed temperature columns are linearly interpolated. Temperatures below or above the table range use the nearest endpoint value.
+        </div>
+
+        <div style="text-align:center; margin-top:18px; padding-top:12px; border-top:1px solid #e5e7eb; font-size:13px; color:#6b7280;">
+            Created by <strong>Slightlyovertorqued</strong>
+        </div>
+
+    </div>
+</div>
+
+<script>
+const tables = {"40XX": {"temps": [-10.0, 0.0, 10.0, 20.0, 30.0, 40.0, 50.0], "rows": {"2 Pilots": [468.0, 486.0, 504.0, 522.0, 540.0, 558.0, 576.0], "2 Pilots +1": [606.0, 629.0, 652.0, 675.0, 698.0, 721.0, 744.0], "2 Pilots +2": [759.0, 788.0, 817.0, 846.0, 875.0, 904.0, 933.0]}}, "41XX": {"temps": [-10.0, 0.0, 10.0, 20.0, 30.0, 40.0, 50.0], "rows": {"2 Pilots": [468.0, 486.0, 504.0, 522.0, 540.0, 558.0, 576.0], "2 Pilots +1": [606.0, 629.0, 652.0, 675.0, 698.0, 721.0, 744.0], "2 Pilots +2": [759.0, 788.0, 817.0, 846.0, 875.0, 904.0, 933.0]}}, "42XX": {"temps": [-10.0, 0.0, 10.0, 20.0, 30.0, 40.0, 50.0], "rows": {"2 Pilots": [468.0, 486.0, 504.0, 522.0, 540.0, 558.0, 576.0], "2 Pilots +1": [606.0, 629.0, 652.0, 675.0, 698.0, 721.0, 744.0], "2 Pilots +2": [759.0, 788.0, 817.0, 846.0, 875.0, 904.0, 933.0]}}, "43XX": {"temps": [-10.0, 0.0, 10.0, 20.0, 30.0, 40.0, 50.0], "rows": {"Pilot": [460.0, 480.0, 500.0, 520.0, 540.0, 550.0, 570.0], "Pilot +1": [650.0, 680.0, 700.0, 730.0, 750.0, 780.0, 800.0]}}, "45XX": {"temps": [-10.0, 0.0, 10.0, 20.0, 30.0, 40.0, 50.0], "rows": {"Pilot": [460.0, 480.0, 500.0, 520.0, 540.0, 550.0, 570.0], "Pilot +1": [650.0, 680.0, 700.0, 730.0, 750.0, 780.0, 800.0]}}, "46XX": {"temps": [-10.0, 0.0, 10.0, 20.0, 30.0, 40.0, 50.0], "rows": {"2 Pilots": [468.0, 486.0, 504.0, 522.0, 540.0, 558.0, 576.0], "2 Pilots +1": [606.0, 629.0, 652.0, 675.0, 698.0, 721.0, 744.0], "2 Pilots +2": [759.0, 788.0, 817.0, 846.0, 875.0, 904.0, 933.0]}}, "47XX": {"temps": [-10.0, 0.0, 10.0, 20.0, 30.0, 40.0, 50.0], "rows": {"Pilot": [460.0, 480.0, 500.0, 520.0, 540.0, 550.0, 570.0], "Pilot +1": [650.0, 680.0, 700.0, 730.0, 750.0, 780.0, 800.0]}}, "48XX": {"temps": [-10.0, 0.0, 10.0, 20.0, 30.0, 40.0, 50.0], "rows": {"2 Pilots": [716.0, 744.0, 771.0, 798.0, 826.0, 853.0, 880.0], "2 Pilots +1": [874.0, 907.0, 940.0, 974.0, 1007.0, 1040.0, 1073.0], "2 Pilots +2": [1103.0, 1145.0, 1187.0, 1229.0, 1270.0, 1312.0, 1354.0]}}, "49XX": {"temps": [-10.0, 0.0, 10.0, 20.0, 30.0, 40.0, 50.0], "rows": {"2 Pilots": [716.0, 744.0, 771.0, 798.0, 826.0, 853.0, 880.0], "2 Pilots +1": [874.0, 907.0, 940.0, 974.0, 1007.0, 1040.0, 1073.0], "2 Pilots +2": [1103.0, 1145.0, 1187.0, 1229.0, 1270.0, 1312.0, 1354.0]}}};
+
+function interpolate(x, xs, ys) {
+    if (x <= xs[0]) return ys[0];
+    if (x >= xs[xs.length - 1]) return ys[ys.length - 1];
+
+    for (let i = 0; i < xs.length - 1; i++) {
+        if (x >= xs[i] && x <= xs[i+1]) {
+            const x1 = xs[i], x2 = xs[i+1];
+            const y1 = ys[i], y2 = ys[i+1];
+            return y1 + (x - x1) * (y2 - y1) / (x2 - x1);
+        }
+    }
+    return null;
+}
+
+function fmt(v) {
+    if (v === null || Number.isNaN(v)) return "—";
+    return Number.isInteger(v) ? v.toString() : v.toFixed(1);
+}
+
+function update() {
+    const nose = document.getElementById("nose").value.trim();
+    const oat = parseFloat(document.getElementById("oat").value);
+    const cockpitF = parseFloat(document.getElementById("cockpit").value);
+    const error = document.getElementById("error");
+    const results = document.getElementById("results");
+
+    error.style.display = "none";
+    error.textContent = "";
+    results.innerHTML = "";
+
+    if (!nose || Number.isNaN(oat) || Number.isNaN(cockpitF)) {
+        error.textContent = "Enter a valid nose number, OAT, and cockpit temperature.";
+        error.style.display = "block";
+        document.getElementById("refTemp").textContent = "—";
+        document.getElementById("tableUsed").textContent = "—";
+        return;
+    }
+
+    const prefix = nose.padStart(4, "0").slice(0,2);
+    const tableName = prefix + "XX";
+    const table = tables[tableName];
+
+    const cockpitC = (cockpitF - 32) / 1.8;
+    const refTemp = (oat + cockpitC) / 2;
+
+    document.getElementById("refTemp").textContent = refTemp.toFixed(1);
+    document.getElementById("tableUsed").textContent = table ? tableName : "Invalid Nose";
+
+    if (!table) {
+        error.textContent = "No lookup table exists for this nose-number series.";
+        error.style.display = "block";
+        return;
+    }
+
+    for (const [label, values] of Object.entries(table.rows)) {
+        const val = interpolate(refTemp, table.temps, values);
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${label}</td><td class="value">${fmt(val)}</td>`;
+        results.appendChild(tr);
+    }
+}
+
+["nose","oat","cockpit"].forEach(id => {
+    document.getElementById(id).addEventListener("input", update);
+});
+update();
+</script>
+
+</body>
+</html>
